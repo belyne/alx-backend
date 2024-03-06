@@ -1,73 +1,47 @@
-import redis from 'redis';
+import { createClient } from "redis";
 
-// Create a Redis client
-const client = redis.createClient();
+const client = createClient();
 
-// Attempt to connect to the Redis server
-client.on('connect', () => {
-  console.log('Redis client connected to the server');
+client.on("connect", () => {
+  console.log("Redis client connected to the server");
 });
 
-// Handle connection errors
-client.on('error', (error) => {
+client.on("error", (error) => {
   console.error(`Redis client not connected to the server: ${error}`);
 });
 
-// Function to create and store a hash
-function createHash() {
-  // Use hset to store values in the hash
-  client.hset(
-    'HolbertonSchools',
-    'Portland',
-    50,
-    redis.print
-  );
-  client.hset(
-    'HolbertonSchools',
-    'Seattle',
-    80,
-    redis.print
-  );
-  client.hset(
-    'HolbertonSchools',
-    'New York',
-    20,
-    redis.print
-  );
-  client.hset(
-    'HolbertonSchools',
-    'Bogota',
-    20,
-    redis.print
-  );
-  client.hset(
-    'HolbertonSchools',
-    'Cali',
-    40,
-    redis.print
-  );
-  client.hset(
-    'HolbertonSchools',
-    'Paris',
-    2,
-    redis.print
-  );
-}
-
-// Function to display the stored hash
-function displayHash() {
-  // Use hgetall to retrieve the entire hash
-  client.hgetall('HolbertonSchools', (error, result) => {
-    if (error) {
-      console.error(`Error getting hash: ${error}`);
+// Function to set a hash value in Redis
+const setHashValue = (hashKey, field, value) => {
+  client.hset(hashKey, field, value, (err, reply) => {
+    if (err) {
+      console.error(`Error setting hash value: ${err}`);
     } else {
+      console.log(`Hash value set successfully: ${reply}`);
+    }
+  });
+};
+
+// Function to get all hash values in Redis
+const getAllHashValues = (hashKey) => {
+  client.hgetall(hashKey, (err, result) => {
+    if (err) {
+      console.error(`Error retrieving hash values: ${err}`);
+    } else {
+      console.log(`All hash values for ${hashKey}:`);
       console.log(result);
     }
-    // Quit Redis connection gracefully
+    // Quit the client gracefully after completing the operations
     client.quit();
   });
-}
+};
 
-// Call functions at the end of the file
-createHash();
-displayHash();
+// Set hash values for cities
+setHashValue("HolbertonSchools", "Portland", "50");
+setHashValue("HolbertonSchools", "Seattle", "80");
+setHashValue("HolbertonSchools", "New York", "20");
+setHashValue("HolbertonSchools", "Bogota", "20");
+setHashValue("HolbertonSchools", "Cali", "40");
+setHashValue("HolbertonSchools", "Paris", "2");
+
+// Display all hash values
+getAllHashValues("HolbertonSchools");
